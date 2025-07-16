@@ -17,7 +17,7 @@ The child mortality cohort comprises approximately 1.5 million Dutch children wh
 - c00_infant_mortality: Represents the death of children that occurs between 24 completed weeks of gestation and up to 365 days after birth.
 
 ## 3. Prim8 sample
-The prim8 samples consists of students in the final (8th) grade of primary school who were born between 2003 and 2006 (1st sample), and 2009 and 2011 (2nd sample). We assign these students to their home address based on the address on their 10th birthday. Parental income is measured between 2009n and 2013 (1st sample), and 2014 and 2018 (2nd sample). The outcomes are assessed are measured in the final (8th) grade of primary school.
+The prim8 samples consist of students in the final (8th) grade of primary school who were born between 2003 and 2006 (1st sample), and 2009 and 2011 (2nd sample). We assign these students to their home address based on the address on their 10th birthday. Parental income is measured between 2009 and 2013 (1st sample), and 2014 and 2018 (2nd sample). Parental education is defined on the child's 10th birthday. The outcomes are measured in the final (8th) grade of primary school.
 	
 - c11_math: Indicates whether the student has achieved at least the required level of mathematics in grade 8 of elementary school.
 - c11_reading: Indicates whether the student has achieved at least the required level of reading in grade 8 of elementary school.
