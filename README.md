@@ -1,79 +1,204 @@
-# KansenKaart preprocessing
-*Pipeline to create cohorts for the KansenKaart project*
+# README and Guidance OpportunityMap Preprocessing
 
-![pipeline.png](pipeline.png)
+This readme follows the template created by Social Science Data Editors. See [References](#references).
 
-A reproducible preprocessing pipeline for the [KansenKaart]( https://kansenkaart.nl/) project. The input is raw microdata from CBS (or a synthetic test-version from our repository [cbs_validationdata](https://github.com/sodascience/cbs_validationdata)). The output is several tidy, cleaned-up cohort data sets. The cohort data sets serve as the input to the [kansenkaart analysis](https://github.com/sodascience/kansenkaart_analysis).
+## Overview
 
-## What is KansenKaart?
-[KansenKaart]( https://kansenkaart.nl/) is a project on intergenerational mobility across areas in the Netherlands. The goal is to show how circumstances in which Dutch individuals grew up are related to later-in-life outcomes. 
+<figure>
 
-We start by measuring the average outcomes in later life, such as income, for children in each neighborhood, considering different demographic subgroups (such as gender, migration background, and the number of parents in the household they grew up in) and socioeconomic status (based on parental income). Our focus is on the municipalities, neighborhoods, and postal codes where the children grew up, regardless of their current place of residence. Subsequently, we analyze these geographical disparities in later-life outcomes across various areas in the Netherlands. The final results are now accessible on the interactive website [KansenKaart.nl](https://kansenkaart.nl/), which provides information on a wide range of outcomes, including health, education, and economic productivity.
+<img src="images/Opportunity%20Map%20Project%20Pipeline.png" alt="OpportunityMap Pipeline"/>
 
-So far, we have obtained a total of 64 outcomes from seven different cohorts. These cohorts have been generated utilizing the repository provided. For more comprehensive information about the cohorts, please refer to the available details [here](https://github.com/sodascience/kansenkaart_preprocessing/blob/cbs_updated/resources/documentation/COHORTS.md). The final estimates of these outcomes are created using the repository [kansenkaart analysis](https://github.com/sodascience/kansenkaart_analysis).
+<figcaption aria-hidden="true">
 
-## Installation
-- Clone this repository to a folder on your machine
-- Unzip the latest version of the built CBS data into the `/cbsdata` folder from [here](https://github.com/sodascience/cbs_validationdata/releases) OR edit the file locations in the `config` files to point to the right files.
-- Open the `.Rproj` file, install the `renv` package
-- Run `renv::restore()` to install the right versions of all dependencies
+OpportunityMap Pipeline
 
-## Cohort creation/ usage
-The cohort data sets are created using the file `create_cohort_data.R`. At the top of this file, change the desired input configuration to one of the following:
-- `config/main.yml`
-- `config/students.yml`
-- `config/high_school.yml`
-- `config/elementary_school.yml`
-- `config/classroom.yml`
-- `config/perinatal.yml`
-- `config/child_mortality.yml`
+</figcaption>
 
-After this change, run the entire file to create the cohort data set in the scratch folder!
+</figure>
 
-# Details
+The code in this replication package generates the samples datasets used to produce the results results shown on the interactive websites OpportunityMap.nl (for the Dutch version see KansenKaart.nl) and OpportunityGap.nl (for the Dutch version see KansenKloof.nl).
 
-## Configuration
-Several cohorts can be created using this repository, from the raw microdata files at CBS. The configuration files for each of these cohorts can be found in the [`config`](./config) folder. Several selections and/or date values can also be changed there.
+## What are OpportunityMap NL and OpportunityGap NL?
 
-## Preparation pipeline
-The data preparation pipeline has four components:
+[OpportunityMap](https://opportunitymap.nl/) and [OpportunityGap](https://opportunitygap.nl/) form part of a research project by the [Netherlands Opportunity Lab](https://github.com/Netherlands-Opportunity-Lab/) which studies intergenerational mobility in the Netherlands. The aim of this research project is to document to what extent the circumstances in which a child grows up are associated with outcomes from birth through adulthood. Child sex, migration background parental income, wealth, education, the number of parents in the household, and the place where a child grows up, are considered predictor variables, which measure circumstances beyond a child’s control.
 
-1. Cohort creation
-    - Selecting the cohort based on filtering criteria. 
-    - Adding parent information to the cohort.
-    - Adding postal code and region information to the cohort.
-    - Writing `01_cohort.rds` to the scratch folder.
-2. Predictor creation
-    - Adding parent income and income percentile to the cohort.
-    - Adding migration background information to the cohort.
-    - Writing `02_predictor.rds` to the scratch folder.
-3. Outcome creation
-    - Adding outcomes of children to the cohort.
-    - Writing `03_outcomes.rds` to the scratch folder.
-4. Post-processing
-    - Selecting variables of interest.
-    - Writing `kansenkaart_data.rds` to the scratch folder.
+The scripts in this replication package create the sample datasets used for the [OpportunityMap](https://opportunitymap.nl/) and [OpportunityGap](https://opportunitygap.nl/) analyses which are described [here](https://github.com/sodascience/kansenkaart_analysis) and [here](https://github.com/Netherlands-Opportunity-Lab/Kansenkloof-NL-Analysis), respectively.
 
-More information on these four components can be found [here]( https://github.com/sodascience/kansenkaart_preprocessing/blob/cbs_updated/resources/documentation/COMPONENTS.md). 
+In total we study 91 (including 20 correlates) outcomes that are measured at birth and in the final (eighth) grade of primary school, and at ages 16, 21, and 34-35. These data can be used to provide granular insights into how, when, and where the opportunity gap in the Netherlands opens up.
 
-## Package management
-The CBS server has specific versions of packages. A package version dump is available in the `resources` folder. For package management, we use `renv`. This ensures the same versions are installed as in CBS.
+## Data Availability and Provenance Statements {#data-availability-and-provenance-statements}
 
-To use a new package, install it using `install.packages()`, and then run the file `resources/set_cbs_versions.R`. This will ensure that your package exists at CBS (it will warn & remove if it does not) and also that the package is at the right version.
+The analysis combines several Dutch administrative data registers. The data use is subject to the European Union’s General Data Protection Regulation (GDPR) and Dutch law. The research is conducted within the secure remote access microdata CCenvironment of Statistics Netherlands.
 
-## License and citation
+Researchers interested in obtaining access to the data employed in this analysis are required to submit a research proposal, a publication plan, a GDPR-ground and purpose, and an application form, Access will be granted only to institutions with a valid authorization by Statistics Netherlands. All relevant information on how to obtain data access through Statistics Netherlands and institutional authorization can be found [here](https://www.cbs.nl/en-gb/our-services/customised-services-microdata/microdata-conducting-your-own-research/applying-for-access-to-microdata).
 
-The `KansenKaart preprocessing` pipeline is published under the MIT license. When using for academic work, please cite:
+### License for Code
 
-```
-Citation for the KansenKaart preprocessing
-```
+The code is licensed under a GPL v3 license. See LICENSE.txt for details.
 
-## Contact
-This project is developed and maintained by the [ODISSEI Social Data Science
-(SoDa)](https://odissei-data.nl/nl/soda/) team.
+Over and above the legal restrictions imposed by this license, if you use this software for an academic publication then you are obliged to provide proper attribution. This can be to this code directly,
 
-Do you have questions, suggestions, or remarks? File an issue in the issue
-tracker or feel free to contact [Erik-Jan van
-Kesteren](https://github.com/vankesteren)
-([@ejvankesteren](https://twitter.com/ejvankesteren)) or [Helen Lam](https://github.com/Helenlam20).
+XXXX (Zenodo)
+
+### Summary of Availability
+
+-   Some data **cannot be made** publicly available.
+
+### Data Source
+
+All the results in the paper use confidential microdata from the Statistics Netherlands (CBS).
+
+To gain access to the microdata, follow the directions in section [Data Availability and Provenance Statements](#data-availability-and-provenance-statements).
+
+To replicate the analyses, you must request the following datasets from Statistics Netherlands.
+
+-   Sample construction: gbapersoontab; gbaadresobjectbus; kindoudertab; vslpostcodebus; vslgwbtab
+
+-   Predictors: IPI; inpatab; inhatab; vehtab; gbapersoontab; gbahuishoudensbus
+
+-   Outcomes: inpatab; IPI; hoogsteopltab; spolisbus; secmbus; zvwzorgkostentab; vehtab; eigendomtab; schtab; kindoudertab; levcyclwoonnietwoonbus;jdgbeschermbus; inschrwpotab; doodoorztab; gbaoverlijdentab.
+
+### Samples
+
+The Opportunity Map Preprocessing generates multiple samples, each defined by the age at which outcomes are measured. This is reflected in the sample names. A more detailed description of samples can be found [here](./resources/documentation/Samples.md).
+
+| Outcome Group | Description |
+|-----------------------|------------------------------------------------|
+| `newborns` | Outcomes measured at/around birth |
+| `prim8` | Outcomes measured in the last year of primary school (grade 8) |
+| `age16` | Outcomes measured at age 16 |
+| `age21` | Outcomes measured at age 21 |
+| `age35` | Outcomes measured at age 34-35 |
+
+### Code
+
+Code for the samples creation is provided as part of this replication package. It is available [here]((Zenodo%20link)). Description follows in [Description of scripts](#description-of-scripts).
+
+## Dataset list
+
+| Location | List of data files | Notes |
+|------------------|---------------------------|---------------------------|
+| /resources | Consumentenprijzen\_\_prijsindex_2015_100_07012021_123946.csv | Consumer price index with base year 2015 |
+|  | Gemeenten en COROP vanaf 1981.xlsx | Historical list of municipalities and COROP regions |
+|  | Hoftiezer_Geboortegewicht curves.xlsx | Birth weight reference curves by Hoftiezer et al. |
+|  | LANDAKTUEELREF10.sav | CBS land classification reference data |
+|  | create_cbs_countries.R | Script to generate CBS country classifications |
+|  | gemeenten_corop_1981.xlsx | Duplicate or cleaned version of COROP-municipality mapping |
+|  | r_packages_cbs.csv | List of R packages used for CBS scripts |
+|  | r_version_cbs.txt | R version used for CBS-related analysis |
+|  | set_cbs_versions.R | Script to define CBS version settings |
+|  | sources.txt | Text file listing data sources |
+|  | vo_advisering.xlsx | Data on secondary school advising (VO advisering) |
+
+## Computational requirements
+
+### Software Requirements
+
+-   R 3.4.3
+
+    -   renv (1.1.4): Run renv::restore() to install the right versions of all dependencies
+
+### Memory and Runtime Requirements
+
+#### Summary
+
+Approximate time needed to reproduce the analyses on a standard (CURRENT YEAR) desktop machine:
+
+-   Not feasible to run on a desktop machine, as described below.
+
+#### Details
+
+The code was last run on the ODISSEI Secure Supercomputer (OSSC).
+
+Computation took \### hours.
+
+## Description of scripts {#description-of-scripts}
+
+### **Sample Creation**
+
+To create a sample dataset use `create_cohort_data.R`, change the desired input configuration to one of the following:
+
+-   `config/newborns.yml`
+
+-   `config/prim8.yml`
+
+-   `config/age16.yml`
+
+-   `config/age21.yml`
+
+-   `config/age25.yml`,
+
+    and run the entire file. The sample dataset will be written to the scratch folder.
+
+### **Flowchart Sample Creation**
+
+<figure>
+
+<img src="images/Opportunity%20Map%20Preprocessing%20Flowchart.png" alt="OpportunityMap Preprocessing Flowchart"/>
+
+<figcaption aria-hidden="true">
+
+OpportunityMap Preprocessing Flowchart
+
+</figcaption>
+
+</figure>
+
+### **1. Configuration**
+
+The configuration files for each of the samples can be found in the [`config`](./config) folder. Here sample-dependent values are defined, such as:
+
+-   Sample name and birthdate range filters (`child_birth_date_min` and `child_birth_date_max`)
+
+-   Residency rules, including age ranges and slack days for registration gaps (`child_live_age`, `child_live_slack_days`)
+
+-   Measurement ages for childhood address and outcome definitions (`childhood_home_age`, `outcome_age`) - Reference years for parental income and wealth data
+
+-   Other year ranges for sample-specific outcomes
+
+-   CPI base year used for deflating income
+
+-   File paths to raw CBS microdata and auxiliary resources such as price indices, migration codes, and regional mappings
+
+### 2. **Pipeline**
+
+Here, the pipeline steps are outlined in short. For a more detailed description see [Pipeline description](./resources/documentation/COMPONENTS.md)
+
+#### 1. **Define sample**
+
+-   Select the cohort based on the filtering birthdate criteria
+-   Match to parents
+-   Link to childhood home address
+-   Add geographical area variables to the address
+-   Write `01_cohort.rds` to the scratch folder
+
+#### 2. **Add predictors**
+
+-   Add parent income and define parental income rank
+-   Add parent wealth and define parental wealth rank
+-   Add parent education for newborns and prim8 samples
+-   Create third generation migration background variable and define migration background
+-   Add type of household data
+-   Write `02_predictor.rds` to the scratch folder
+
+#### 3. **Add outcomes**
+
+-   Add sample-specific outcomes
+-   Write `03_outcomes.rds` to the scratch folder
+
+#### 4. **Post-processing**
+
+-   Select variables of interest
+-   Define income and wealth groups based on ranks
+-   Write `kansenkaart_data.rds` to the scratch folder
+
+## Instructions to Replicators
+
+-   Clone this repository to a folder on your machine
+-   Edit the file locations in the `config` files to point to the right files
+-   Open the `.Rproj` file, install the `renv` package
+-   Run `renv::restore()` to install the right versions of all dependencies
+
+# References {#references}
+
+Lars Vilhuber, Connolly, M., Koren, M., Llull, J., & Morrow, P. (2022). A template README for social science replication packages (v1.1). Social Science Data Editors. <https://doi.org/10.5281/zenodo.7293838>
