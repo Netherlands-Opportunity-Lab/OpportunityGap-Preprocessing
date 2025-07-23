@@ -102,7 +102,7 @@ Code for the samples creation is provided as part of this replication package. I
 
 #### Summary
 
-Approximate time needed to reproduce the analyses on a standard (CURRENT YEAR) desktop machine:
+Approximate time needed to reproduce the analyses on a standard (2025) desktop machine:
 
 -   Not feasible to run on a desktop machine, as described below.
 
