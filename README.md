@@ -1,6 +1,6 @@
 # README and Guidance OpportunityMap Preprocessing
 
-This readme follows the template created by Social Science Data Editors. See [References](#references).
+This readme follows the template created by Social Science Data Editors. See section References.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The code in this replication package generates the samples datasets used to prod
 
 [OpportunityMap](https://opportunitymap.nl/) and [OpportunityGap](https://opportunitygap.nl/) form part of a research project by the [Netherlands Opportunity Lab](https://github.com/Netherlands-Opportunity-Lab/) which studies intergenerational mobility in the Netherlands. The aim of this research project is to document to what extent the circumstances in which a child grows up are associated with outcomes from birth through adulthood. Child sex, migration background parental income, wealth, education, the number of parents in the household, and the place where a child grows up, are considered predictor variables, which measure circumstances beyond a child’s control.
 
-The scripts in this replication package create the sample datasets used for the [OpportunityMap](https://opportunitymap.nl/) and [OpportunityGap](https://opportunitygap.nl/) analyses which are described [here](https://github.com/sodascience/kansenkaart_analysis) and [here](https://github.com/Netherlands-Opportunity-Lab/Kansenkloof-NL-Analysis), respectively.
+The code in this replication package creates the sample datasets used for the [OpportunityMap](https://opportunitymap.nl/) and [OpportunityGap](https://opportunitygap.nl/) analyses which are described [here](https://github.com/sodascience/kansenkaart_analysis) and [here](https://github.com/Netherlands-Opportunity-Lab/Kansenkloof-NL-Analysis), respectively.
 
 In total we study 91 (including 20 correlates) outcomes that are measured at birth and in the final (eighth) grade of primary school, and at ages 16, 21, and 34-35. These data can be used to provide granular insights into how, when, and where the opportunity gap in the Netherlands opens up.
 
@@ -24,20 +24,6 @@ Researchers interested in obtaining access to the data employed in this analysis
 
 -   Some data **cannot be made** publicly available.
 
-### License for Data
-
-The results are licensed under the CC BY-SA 4.0. See LICENSE.txt for details.
-
-Over and above the legal restrictions imposed by this license, if you use the results for an academic publication then you are obliged to provide proper attribution. This can be to this code directly,
-
-XXXX (Zenodo)
-
-or to the paper that describes it
-
-Lam, H., Ravesteijn, B., van de Kraats, C. & van Kesteren, E.-J. (2025). How, When, and Where Does the Opportunity Gap Open Up in the Netherlands? \[Unpublished manuscript\].
-
-or (ideally) both.
-
 ### License for Code
 
 The code is licensed under a GPL v3 license. See LICENSE.txt for details.
@@ -50,7 +36,7 @@ XXXX (Zenodo)
 
 All the results in the paper use confidential microdata from the Statistics Netherlands (CBS).
 
-To gain access to the microdata, follow the directions in section [Data Availability and Provenance Statements](#data-availability-and-provenance-statements).
+To gain access to the microdata, follow the directions in section Data Availability and Provenance Statements.
 
 ### Microdata files (Confidential)
 
@@ -89,14 +75,14 @@ These files correspond to the ones that can be found in [CBS microdata catalogue
 |  | Hoftiezer_Geboortegewicht curves.xlsx | Birth weight reference curves by Hoftiezer et al. |  |
 |  | LANDAKTUEELREF10.sav | CBS land classification reference data |  |
 |  | gemeenten_corop_1981.xlsx | Duplicate or cleaned version of COROP-municipality mapping |  |
-|  | r_packages_cbs.csv | List of R packages used for CBS scripts |  |
+|  | r_packages_cbs.csv | List of R packages used for CBS code |  |
 |  | r_version_cbs.txt | R version used for CBS-related analysis |  |
 |  | sources.txt | Text file listing data sources |  |
 |  | vo_advisering.xlsx | Data on secondary school advising (VO advisering) |  |
 
 ## Description of Samples
 
-The Opportunity Map Preprocessing generates multiple samples, each defined by the age at which outcomes are measured. This is reflected in the sample names. A more detailed description of samples can be found [here](./resources/documentation/Samples.md).
+The Opportunity Map Preprocessing generates multiple samples, each defined by the age at which outcomes are measured. This is reflected in the sample names.
 
 | Sample | Birth Years | Outcome Age / Timing | Address Reference Age | Parental Income Period | Parental Education Timing | Outcome Timing | Notes |
 |---------|---------|---------|---------|---------|---------|---------|---------|
@@ -108,7 +94,7 @@ The Opportunity Map Preprocessing generates multiple samples, each defined by th
 
 ### How to re-create
 
-Code for the samples creation is provided as part of this replication package. It is available [here]((Zenodo%20link)). Description follows in [Description of scripts](#description-of-scripts).
+Code for the samples creation is provided as part of this replication package. It is available [here]((Zenodo%20link)). Description follows in section Description of code.
 
 ## Computational requirements
 
@@ -132,12 +118,14 @@ The code was last run on the ODISSEI Secure Supercomputer (OSSC).
 
 Computation took \### hours.
 
-## Description of scripts
+## Description of code
 
-### Auxiliary Scripts (Provided)
+Here the code of this repository is described. There are 27 files in total: configuration `.yml`, `01_cohort.R`, `02_predictors.R`, `03_outcomes.R`, `04_postprocessing.R` files for each of the 5 samples, and 2 auxiliary files.
+
+### Auxiliary code (Provided)
 
 | Script Name | Purpose |
-|-------------------------|-----------------------------------------------|
+|--------------------------|----------------------------------------------|
 | `create_cbs_countries.R` | Generates CBS-style country classification tables |
 | `set_cbs_versions.R` | Configures version control for CBS files |
 
@@ -159,14 +147,11 @@ To create a sample dataset use `create_cohort_data.R`, change the desired input 
 
 ### **Flowchart Sample Creation**
 
-<figure>
-<img src="images/Opportunity%20Map%20Preprocessing%20Flowchart.png" alt="OpportunityMap Preprocessing Flowchart" />
-<figcaption aria-hidden="true">OpportunityMap Preprocessing Flowchart</figcaption>
-</figure>
+![](images/Opportunity%20Map%20Preprocessing%20Flowchart.png)
 
 ### 1. **Configuration**
 
-The configuration files for each of the samples can be found in the [`config`](./config) folder. Here sample-dependent values are defined, such as:
+The configuration files for each of the samples can be found in the `config` folder. Here sample-dependent values are defined, such as:
 
 -   Sample name and birthdate range filters (`child_birth_date_min` and `child_birth_date_max`)
 
@@ -182,7 +167,7 @@ The configuration files for each of the samples can be found in the [`config`](.
 
 ### 2. **Pipeline**
 
-Here, the pipeline steps are outlined in short. For a more detailed description see [Pipeline description](./resources/documentation/COMPONENTS.md)
+Here the steps to create the sample data are described.
 
 #### 1. **Define sample**
 
