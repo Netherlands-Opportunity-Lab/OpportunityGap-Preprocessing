@@ -4,8 +4,8 @@ default:
     cohort_name: "age21"
     
     # Child birth date filters the cohort by age
-    child_birth_date_min: "01/01/1995"
-    child_birth_date_max: "31/12/1999"
+    child_birth_date_min: "01/01/1999"
+    child_birth_date_max: "31/12/2003"
 
     # The cohort should live continuously in NL in the following period
     child_live_age: 21
@@ -18,37 +18,44 @@ default:
     childhood_home_age: 15
     
    # Postal code link to homes will be considered on this target date
-    postcode_target_date: "31/12/2023"
+    postcode_target_date: "31/12/2024"
     # Neighbourhood geo link to homes will be considered on this target date
-    gwb_target_date: "31/12/2023"
+    gwb_target_date: "31/12/2024"
     # Corop geo link to homes will be considered on this target date
-    corop_target_date: "31/12/2023"
+    corop_target_date: "31/12/2024"
     
     # Income will be deflated to cpi_base_year euros.
-    cpi_base_year: 2020
+    cpi_base_year: 2024
     
     # Parent income year range
-    parent_income_year_min: 2008
-    parent_income_year_max: 2012
+    parent_income_year_min: 2014
+    parent_income_year_max: 2018
     
     # Parent wealth year range
-    parent_wealth_year_min: 2008
-    parent_wealth_year_max: 2012
+    parent_wealth_year_min: 2014
+    parent_wealth_year_max: 2018
     
     # eduation of students year range
-    education_year_min: 2015
-    education_year_max: 2020
+    education_year_min: 2020
+    education_year_max: 2024
 
-    # primary school classroom year range
-    primary_classroom_year_min: 2005
-    primary_classroom_year_max: 2012
+    # primary school classroom correlates year range
+    primary_classroom_year_min: 2010
+    primary_classroom_year_max: 2015
 
-    # secondary school data year range
-    secondary_classroom_year_min: 2007
-    secondary_classroom_year_max: 2018
+    # secondary school classroom correlates year range
+    secondary_classroom_year_min: 2014
+    secondary_classroom_year_max: 2019
     
     # age at which we measure the outcomes
     outcome_age: 21
+
+    # age at which we measure health outcomes
+    health_outcome_age: 20
+    # health outcomes year range
+    health_year_min: 2019
+    health_year_max: 2023
+    
 
     
   file_locations:
@@ -57,13 +64,14 @@ default:
     # The scratch folder is used to write intermediate output
     scratch_folder: "scratch/age21"
     
-    # path to the cbs microdata
-    gba_data: "Bevolking/GBAPERSOONTAB/2023/GBAPERSOON2023TABV1.sav"
-    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2023BUSV1.sav"
-    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2023TABV1.sav"
-    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2024031.sav"
-    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2023TAB03V1.sav"
-    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2020BUSV1.sav"
+   # path to the cbs microdata
+    gba_data: "Bevolking/GBAPERSOONTAB/2024/GBAPERSOON2024TABV3.sav"
+    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2024BUSV1.sav"
+    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2024TABV1.sav"
+    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2025031.sav"
+    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2025TAB03V1.sav"
+    woon_data: "BouwenWonen/LEVCYCLWOONNIETWOONBUS/LEVCYCLWOONNIETWOONBUSV2024122.sav"
+    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2024BUSV1.sav"
 
 
     # resources
@@ -71,4 +79,3 @@ default:
     migration_data: "K:/Utilities/Code_Listings/SSBreferentiebestanden/LANDAKTUEELREFV11.SAV"
     corop_data: "K:/Utilities/HULPbestanden/GebiedeninNederland/Gemeenten en COROP vanaf 1981.xlsx"
     opleiding_data: "K:/Utilities/Code_Listings/SSBreferentiebestanden/OPLEIDINGSNRREFV34.SAV"
-  

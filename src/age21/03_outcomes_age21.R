@@ -322,133 +322,126 @@ cohort_dat <- cohort_dat %>%
 rm(gba_dat, kindouder_dat, kindvader_dat, kindmoeder_dat)
 
 
-# #### PRIMARY SCHOOL CLASS COMPOSITION ####
-# # load class cohort data
-# class_cohort_dat <- read_rds(file.path(loc$scratch_folder, "class_cohort.rds"))
-# 
-# # combine the main sample and class sample
-# class_cohort_dat <- bind_rows(
-#   class_cohort_dat %>% select ("RINPERSOON", "RINPERSOONS", "GBAGEBOORTELANDMOEDER", "GBAGEBOORTELANDVADER", "income_parents_perc"),
-#   cohort_dat %>% select ("RINPERSOON", "RINPERSOONS", "GBAGEBOORTELANDMOEDER", "GBAGEBOORTELANDVADER", "income_parents_perc"),
-# )
-# 
-# 
-# # function to get latest inschrwpo version of specified year
-# get_inschrwpo_filename <- function(year) {
-#   fl <- list.files(
-#     path = file.path(loc$data_folder, "Onderwijs/INSCHRWPOTAB"),
-#     pattern = paste0("INSCHRWPOTAB", year, "V[0-9]+(?i)(.sav)"),
-#     full.names = TRUE
-#   )
-#   # return only the latest version
-#   sort(fl, decreasing = TRUE)[1]
-# }
-# 
-# school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), WPOLEERJAAR = character(),
-#                      WPOBRIN_crypt = character(), WPOBRINVEST = character(), WPOTYPEPO = character())
-# 
-# for (year in seq(as.integer(cfg$primary_classroom_year_min), as.integer(cfg$primary_classroom_year_max))) {
-#   school_dat <-
-#     # read file from disk
-#     read_sav(get_inschrwpo_filename(year),
-#              col_select = c("RINPERSOONS", "RINPERSOON", "WPOLEERJAAR",
-#                             "WPOBRIN_crypt", "WPOBRINVEST", "WPOTYPEPO")) %>%
-#     mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "value")) %>%
-#     # add year
-#     mutate(year = year) %>%
-#     # add to income children
-#     bind_rows(school_dat, .)
-# }
-# 
-# # keep group 8 pupils
-# school_dat <- school_dat %>%
-#   filter(RINPERSOONS == "R") %>%
-#   mutate(WPOLEERJAAR = trimws(as.character(WPOLEERJAAR))) %>%
-#   filter(WPOLEERJAAR == "8") %>%
-#   select(-WPOLEERJAAR)
-# 
-# 
-# # link to classroom sample
-# school_dat <- school_dat %>%
-#   left_join(class_cohort_dat,
-#             by = c("RINPERSOON", "RINPERSOONS"))%>%
-#   # drop all children who are not in the large classroom sample
-#   filter(!is.na(income_parents_perc))
-# 
-# # primary school ID
-# school_dat <- school_dat %>%
-#   mutate(across(c("WPOBRIN_crypt", "WPOBRINVEST"), as.character)) %>%
-#   mutate(school_ID = paste0(WPOBRIN_crypt, WPOBRINVEST)) %>%
-#   select(-c(WPOBRIN_crypt, WPOBRINVEST))
-# 
-# 
-# # create parents rank income outcomes
-# school_dat <- school_dat %>%
-#   mutate(
-#     # create dummy for below 25th
-#     income_below_25th = ifelse(income_parents_perc < 0.25, 1, 0),
-#     # create dummy for below 50th
-#     income_below_50th = ifelse(income_parents_perc < 0.50, 1, 0),
-#     # create dummy for above 75th
-#     income_above_75th = ifelse(income_parents_perc > 0.75, 1, 0)
-#   )
-# 
-# 
-# # create outcome for children with both parents born in a foreign country
-# school_dat <- school_dat %>%
-#   mutate(
-#     GBAGEBOORTELANDMOEDER = as_factor(GBAGEBOORTELANDMOEDER),
-#     GBAGEBOORTELANDVADER = as_factor(GBAGEBOORTELANDVADER)
-#   ) %>%
-#   mutate(
-#     foreign_born_parents =
-#       ifelse((GBAGEBOORTELANDMOEDER != "Nederland" &
-#                 GBAGEBOORTELANDVADER != "Nederland"),  1, 0))
-# 
-# 
-# # classroom outcomes: class_foreign_born_parents, class_parents_below_25, class_parents_below_50, class_parents_above_75
-# 
-# # only keep classes with more than one student per class
-# school_dat <- school_dat %>%
-#   group_by(school_ID, year) %>%
-#   mutate(n = n()) %>%
-#   filter(n > 1)
-# 
-# 
-# # hold out mean function
-# hold_out_means <- function(x) {
-#   hold <- ((sum(x, na.rm = TRUE) - x) / (length(x) - 1))
-#   return(hold)
-# }
-# 
-# 
-# 
-# # hold out means = mean of the class without the child him/herself
-# school_dat <- school_dat %>%
-#   group_by(school_ID, year) %>%
-#   mutate(
-#     #    primary_N_students_per_school = n(),
-#     primary_class_foreign_born_parents = hold_out_means(foreign_born_parents),
-#     primary_class_income_below_25th = hold_out_means(income_below_25th),
-#     primary_class_income_below_50th = hold_out_means(income_below_50th),
-#     primary_class_income_above_75th = hold_out_means(income_above_75th)
-#   )
-# 
-# 
-# # keep unique observations,for duplicates select the last time the child is in 8th grade
-# school_dat <- school_dat %>%
-#   arrange(desc(year)) %>%
-#   group_by(RINPERSOONS, RINPERSOON) %>%
-#   filter(row_number() == 1)
-# 
-# # add to outcomes to cohort
-# cohort_dat <- cohort_dat %>%
-#   left_join (school_dat %>%
-#                 select(RINPERSOONS, RINPERSOON, primary_class_foreign_born_parents, primary_class_income_below_25th, primary_class_income_below_50th, primary_class_income_above_75th),
-#               by = c("RINPERSOONS", "RINPERSOON"))
-# 
-# rm(school_dat)
-# 
+#### PRIMARY SCHOOL CLASS COMPOSITION ####
+
+# load class cohort data
+class_cohort_dat <- read_rds(file.path(loc$scratch_folder, "class_cohort.rds"))
+
+# combine the main sample and class sample
+class_cohort_dat <- bind_rows(
+  class_cohort_dat %>% select("RINPERSOON", "RINPERSOONS", "GBAGEBOORTELANDMOEDER", "GBAGEBOORTELANDVADER", "income_parents_perc"),
+  cohort_dat %>% select("RINPERSOON", "RINPERSOONS", "GBAGEBOORTELANDMOEDER", "GBAGEBOORTELANDVADER", "income_parents_perc"),
+)
+
+# function to get latest inschrwpo version of specified year
+get_inschrwpo_filename <- function(year) {
+  fl <- list.files(
+    path = file.path(loc$data_folder, "Onderwijs/INSCHRWPOTAB"),
+    pattern = paste0("INSCHRWPOTAB", year, "V[0-9]+(?i)(.sav)"),
+    full.names = TRUE
+  )
+  # return only the latest version
+  sort(fl, decreasing = TRUE)[1]
+}
+
+school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), WPOLEERJAAR = character(),
+                     WPOBRIN_crypt = character(), WPOBRINVEST = character(), WPOTYPEPO = character())
+
+for (year in seq(as.integer(cfg$primary_classroom_year_min), as.integer(cfg$primary_classroom_year_max))) {
+  school_dat <-
+    # read file from disk
+    read_sav(get_inschrwpo_filename(year),
+             col_select = c("RINPERSOONS", "RINPERSOON", "WPOLEERJAAR",
+                            "WPOBRIN_crypt", "WPOBRINVEST", "WPOTYPEPO")) %>%
+    mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "value")) %>%
+    # add year
+    mutate(year = year) %>%
+    # add to income children
+    bind_rows(school_dat, .)
+}
+
+# keep group 8 pupils
+school_dat <- school_dat %>%
+  filter(RINPERSOONS == "R") %>%
+  mutate(WPOLEERJAAR = trimws(as.character(WPOLEERJAAR))) %>%
+  filter(WPOLEERJAAR == "8") %>%
+  select(-WPOLEERJAAR)
+
+# link to classroom sample
+school_dat <- school_dat %>%
+  left_join(class_cohort_dat,
+            by = c("RINPERSOON", "RINPERSOONS")) %>%
+  # drop all children who are not in the large classroom sample
+  filter(!is.na(income_parents_perc))
+
+# primary school ID
+school_dat <- school_dat %>%
+  mutate(across(c("WPOBRIN_crypt", "WPOBRINVEST"), as.character)) %>%
+  mutate(school_ID = paste0(WPOBRIN_crypt, WPOBRINVEST)) %>%
+  select(-c(WPOBRIN_crypt, WPOBRINVEST))
+
+# create parents rank income outcomes
+school_dat <- school_dat %>%
+  mutate(
+    # create dummy for below 25th
+    income_below_25th = ifelse(income_parents_perc < 0.25, 1, 0),
+    # create dummy for below 50th
+    income_below_50th = ifelse(income_parents_perc < 0.50, 1, 0),
+    # create dummy for above 75th
+    income_above_75th = ifelse(income_parents_perc > 0.75, 1, 0)
+  )
+
+# create outcome for children with both parents born in a foreign country
+school_dat <- school_dat %>%
+  mutate(
+    GBAGEBOORTELANDMOEDER = as_factor(GBAGEBOORTELANDMOEDER),
+    GBAGEBOORTELANDVADER = as_factor(GBAGEBOORTELANDVADER)
+  ) %>%
+  mutate(
+    foreign_born_parents =
+      ifelse((GBAGEBOORTELANDMOEDER != "Nederland" &
+                GBAGEBOORTELANDVADER != "Nederland"), 1, 0)
+  )
+
+# only keep classes with more than one student per class
+school_dat <- school_dat %>%
+  group_by(school_ID, year) %>%
+  mutate(n = n()) %>%
+  filter(n > 1)
+
+# hold out mean function
+hold_out_means <- function(x) {
+  hold <- ((sum(x, na.rm = TRUE) - x) / (length(x) - 1))
+  return(hold)
+}
+
+# hold out means = mean of the class without the child him/herself
+school_dat <- school_dat %>%
+  group_by(school_ID, year) %>%
+  mutate(
+    primary_class_foreign_born_parents = hold_out_means(foreign_born_parents),
+    primary_class_income_below_25th = hold_out_means(income_below_25th),
+    primary_class_income_below_50th = hold_out_means(income_below_50th),
+    primary_class_income_above_75th = hold_out_means(income_above_75th)
+  )
+
+# keep unique observations, for duplicates select the last time the child is in 8th grade
+school_dat <- school_dat %>%
+  arrange(desc(year)) %>%
+  group_by(RINPERSOONS, RINPERSOON) %>%
+  filter(row_number() == 1)
+
+# add outcomes to cohort
+cohort_dat <- cohort_dat %>%
+  left_join(school_dat %>%
+              select(RINPERSOONS, RINPERSOON,
+                     primary_class_foreign_born_parents,
+                     primary_class_income_below_25th,
+                     primary_class_income_below_50th,
+                     primary_class_income_above_75th),
+            by = c("RINPERSOONS", "RINPERSOON"))
+
+rm(school_dat)
 
 
 #### SECONDARY SCHOOL CLASS COMPOSITION ####
@@ -593,8 +586,14 @@ rm(school_dat, class_cohort_dat)
 # add prefix to outcomes
 outcomes <- c("high_school_attained", "hbo_followed", "uni_followed", 
               "living_with_parents", "young_parents",
-              # "primary_class_foreign_born_parents", "primary_class_income_below_25th", "primary_class_income_below_50th", "primary_class_income_above_75th",
-              "secondary_class_foreign_born_parents", "secondary_class_income_below_25th", "secondary_class_income_below_50th", "secondary_class_income_above_75th")
+              "primary_class_foreign_born_parents", "primary_class_income_below_25th", 
+              "primary_class_income_below_50th", "primary_class_income_above_75th",
+              "age12_neighborhood_income_below_25th", "age12_neighborhood_income_below_50th", 
+              "age12_neighborhood_income_above_75th", "age12_neighborhood_foreign_born_parents",
+              "secondary_class_foreign_born_parents", "secondary_class_income_below_25th", 
+              "secondary_class_income_below_50th", "secondary_class_income_above_75th",
+              "age16_neighborhood_income_below_25th", "age16_neighborhood_income_below_50th", 
+              "age16_neighborhood_income_above_75th", "age16_neighborhood_foreign_born_parents",)
 
 suffix <- "c21_"
 

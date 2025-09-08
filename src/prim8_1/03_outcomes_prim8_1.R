@@ -762,7 +762,9 @@ outcomes <- c("vmbo_gl_final", "havo_final", "vwo_final",
               "class_vwo_test", "class_foreign_born_parents", 
               "class_income_below_25th", "class_income_below_50th",
               "class_income_above_75th", "class_math", "class_language", 
-              "class_reading", "class_size")
+              "class_reading", "class_size", "primary_neighborhood_income_below_25th", 
+              "primary_neighborhood_income_below_50th", "primary_neighborhood_income_above_75th", 
+              "primary_neighborhood_foreign_born_parents")
 
 suffix <- "c11_"
 

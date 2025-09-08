@@ -805,12 +805,14 @@ rm(school_dat, class_cohort_dat)
 # add prefix to outcomes
 outcomes <- c("vmbo_gl", "havo", "vwo", 
               "youth_health_costs", "youth_protection", "living_space_pp", 
-              
               "primary_class_foreign_born_parents", "primary_class_income_below_25th", 
               "primary_class_income_below_50th", "primary_class_income_above_75th",
-              
+              "age12_neighborhood_income_below_25th", "age12_neighborhood_income_below_50th", 
+              "age12_neighborhood_income_above_75th", "age12_neighborhood_foreign_born_parents",
               "secondary_class_foreign_born_parents", "secondary_class_income_below_25th", 
-              "secondary_class_income_below_50th", "secondary_class_income_above_75th")
+              "secondary_class_income_below_50th", "secondary_class_income_above_75th",
+              "neighborhood_income_below_25th", "neighborhood_income_below_50th", 
+              "neighborhood_income_above_75th", "neighborhood_foreign_born_parents")
 suffix <- "c16_"
 
 

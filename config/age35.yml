@@ -4,8 +4,8 @@ default:
     cohort_name: "age35"
     
     # Child birth date filters the cohort by age
-    child_birth_date_min: "01/01/1981"
-    child_birth_date_max: "31/12/1985"
+    child_birth_date_min: "01/01/1985"
+    child_birth_date_max: "31/12/1989"
 
     # The cohort should live continuously in NL in the following period
     child_live_start: 34
@@ -19,14 +19,14 @@ default:
     childhood_home_age: 15
     
     # Postal code link to homes will be considered on this target date
-    postcode_target_date: "31/12/2023"
+    postcode_target_date: "31/12/2024"
     # Neighbourhood geo link to homes will be considered on this target date
-    gwb_target_date: "31/12/2023"
+    gwb_target_date: "31/12/2024"
     # Corop geo link to homes will be considered on this target date
-    corop_target_date: "31/12/2023"
+    corop_target_date: "31/12/2024"
     
     # Income will be deflated to cpi_base_year euros.
-    cpi_base_year: 2020
+    cpi_base_year: 2024
     
     # Parent income year range
     parent_income_year_min: 2003
@@ -34,27 +34,33 @@ default:
     
     # Parent wealth year range
     parent_wealth_year_min: 2006
-    parent_wealth_year_max: 2011
+    parent_wealth_year_max: 2010
     
     # child age at which we measure the outcome
     outcome_age: 35
+
+    # age at which we measure health outcomes
+    health_outcome_age: 34
+    # health outcomes year range
+    health_year_min: 2019
+    health_year_max: 2023
     
     # The parents education will be added to to the cohort
     education_parents: false
     
     # Child income year range
-    child_income_year_min: 2015
-    child_income_year_max: 2020
+    child_income_year_min: 2019
+    child_income_year_max: 2024
     
     # Child outome year range
-    child_outcome_year_min: 2016
-    child_outcome_year_max: 2020
+    child_outcome_year_min: 2020
+    child_outcome_year_max: 2024
     
     # gifts received year range
     gifts_dat_start: 2007
-    gifts_dat_end: 2020
-    gifts_year_start: 26
-    gifts_year_end: 35
+    gifts_dat_end: 2022
+    gifts_year_start: 22
+    gifts_year_end: 33
     
     
   file_locations:
@@ -63,21 +69,19 @@ default:
     # The scratch folder is used to write intermediate output
     scratch_folder: "scratch/age35"
     
-    # path to the cbs microdata
-    gba_data: "Bevolking/GBAPERSOONTAB/2023/GBAPERSOON2023TABV1.sav"
-    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2023BUSV1.sav"
-    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2023TABV1.sav"
-    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2024031.sav"
-    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2023TAB03V1.sav"
-    secm_data: "InkomenBestedingen/SECMBUS/SECMBUS2021V1.SAV"
-    property_data: "BouwenWonen/EIGENDOMTAB/EIGENDOM2018TABV3.sav"
-    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2020BUSV1.sav"
-    birth_dat: "Bevolking/GBAPERSOONTAB/2021/GBAPERSOON2021TABV1.sav"
+     # path to the cbs microdata
+    gba_data: "Bevolking/GBAPERSOONTAB/2024/GBAPERSOON2024TABV3.sav"
+    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2024BUSV1.sav"
+    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2024TABV1.sav"
+    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2025031.sav"
+    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2025TAB03V1.sav"
+    secm_data: "InkomenBestedingen/SECMBUS/SECMBUS2023V1.SAV"
     woon_data: "BouwenWonen/LEVCYCLWOONNIETWOONBUS/LEVCYCLWOONNIETWOONBUSV2024122.sav"
+    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2024BUSV1.sav"
+
 
     # resources
     cpi_index_data: "resources/Consumentenprijzen__prijsindex_2015_100_14112022_221558.xlsx"
     migration_data: "K:/Utilities/Code_Listings/SSBreferentiebestanden/LANDAKTUEELREFV11.SAV"
     corop_data: "K:/Utilities/HULPbestanden/GebiedeninNederland/Gemeenten en COROP vanaf 1981.xlsx"
-
-    
+  

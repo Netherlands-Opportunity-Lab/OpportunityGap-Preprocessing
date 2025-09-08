@@ -1547,11 +1547,11 @@ outcomes <- c("income", "income_perc", "hbo_attained", "wo_attained", "hourly_wa
               "wealth_no_home", "home_wealth", "homeowner",
               "gifts_received", "household_income", "household_income_perc", 
               "living_space_pp", "sum_gifts", "age_left_parents", 
-              "disposable_household_income_perc", "disposable_household_income", 
-              "primary_household_income_perc", "primary_household_income", 
+              "disposable_household_income", "disposable_household_income_perc",
+              "primary_household_income", "primary_household_income_perc",
               "earnings", "earnings_perc", "top_20_household_income", 
-              "bottom_20_household_income", "top_20_income", "bottom_20_income"
-              )
+              "bottom_20_household_income", "top_20_income", "bottom_20_income", 
+              "below_poverty")
 suffix <- "c35_"
 
 

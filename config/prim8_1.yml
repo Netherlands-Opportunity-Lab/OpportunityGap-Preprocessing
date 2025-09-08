@@ -1,7 +1,7 @@
 default:
   data_preparation:
     # The name of the cohort
-    cohort_name: "prim8"
+    cohort_name: "prim8_1"
     
     # Child birth date filters the cohort by age
     child_birth_date_min: "01/01/2003"
@@ -15,22 +15,22 @@ default:
     childhood_home_age: 10
     
    # Postal code link to homes will be considered on this target date
-    postcode_target_date: "31/12/2023"
+    postcode_target_date: "31/12/2024"
     # Neighbourhood geo link to homes will be considered on this target date
-    gwb_target_date: "31/12/2023"
+    gwb_target_date: "31/12/2024"
     # Corop geo link to homes will be considered on this target date
-    corop_target_date: "31/12/2023"
+    corop_target_date: "31/12/2024"
     
     # Income will be deflated to cpi_base_year euros.
-    cpi_base_year: 2020
+    cpi_base_year: 2024
     
     # Parent income year range
-    parent_income_year_min: 2014
-    parent_income_year_max: 2018
+    parent_income_year_min: 2013
+    parent_income_year_max: 2016
     
     # Parent wealth year range
-    parent_wealth_year_min: 2014
-    parent_wealth_year_max: 2018
+    parent_wealth_year_min: 2013
+    parent_wealth_year_max: 2016
     
     # The parents education will be added to to the cohort
     education_parents: true
@@ -38,22 +38,27 @@ default:
     # elementary school year range
     elementary_school_year_min: 2014
     elementary_school_year_max: 2018
+
+    # health outcomes year range
+    health_year_min: 2013
+    health_year_max: 2017
+
     
     
   file_locations:
     # The data folder is the root folder of the cbs microdata tables
     data_folder: "G:/"
     # The scratch folder is used to write intermediate output
-    scratch_folder: "scratch/prim8"
+    scratch_folder: "scratch/prim8_1"
     
     # path to the cbs microdata
-    gba_data: "Bevolking/GBAPERSOONTAB/2023/GBAPERSOON2023TABV1.sav"
-    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2023BUSV1.sav"
-    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2023TABV1.sav"
-    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2024031.sav"
-    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2024TAB03V1.sav"
+    gba_data: "Bevolking/GBAPERSOONTAB/2024/GBAPERSOON2024TABV3.sav"
+    gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2024BUSV1.sav"
+    kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2024TABV1.sav"
+    postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2025031.sav"
+    vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2025TAB03V1.sav"
     woon_data: "BouwenWonen/LEVCYCLWOONNIETWOONBUS/LEVCYCLWOONNIETWOONBUSV2024122.sav"
-    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2020BUSV1.sav"
+    household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2024BUSV1.sav"
 
 
     # resources
