@@ -70,15 +70,14 @@ These files correspond to the ones that can be found in [CBS microdata catalogue
 
 | Location | File name | Description | Source |
 |------------------|-------------------|------------------|------------------|
-| /resources | Consumentenprijzen\_\_prijsindex_2015_100_07012021_123946.csv | Consumer price index with base year 2015 |  |
-|  | Gemeenten en COROP vanaf 1981.xlsx | Historical list of municipalities and COROP regions |  |
-|  | Hoftiezer_Geboortegewicht curves.xlsx | Birth weight reference curves by Hoftiezer et al. |  |
-|  | LANDAKTUEELREF10.sav | CBS land classification reference data |  |
-|  | gemeenten_corop_1981.xlsx | Duplicate or cleaned version of COROP-municipality mapping |  |
-|  | r_packages_cbs.csv | List of R packages used for CBS code |  |
-|  | r_version_cbs.txt | R version used for CBS-related analysis |  |
-|  | sources.txt | Text file listing data sources |  |
-|  | vo_advisering.xlsx | Data on secondary school advising (VO advisering) |  |
+| /resources | Consumentenprijzen\_\_prijsindex_2015_100_07012021_123946.csv | Consumer price index | CBS |
+|  | Gemeenten en COROP vanaf 1981.xlsx | Historical list of municipalities and COROP regions | CBS |
+|  | Hoftiezer_Geboortegewicht curves.xlsx | Birth weight reference curves by Hoftiezer et al. | Hoftiezer, L. et al. American Journal of Obstetrics and Gynecology (2018) doi: 10.1016/j.ajog.2018.12.023 & Hoftiezer, L., Hukkelhoven, C.W.P.M., Hogeveen, M. et al. Eur J Pediatr (2016) 175: 1047-57. doi: 10.1007/s00431-016-2740-8 |
+|  | LANDAKTUEELREF10.sav | CBS country classification | CBS |
+|  | r_packages_cbs.csv | List of R packages available in the secure environment |  |
+|  | r_version_cbs.txt | R version used for the analysis | Created by us |
+|  | sources.txt | Text file listing data sources | Created by us |
+|  | vo_advisering.xlsx | Data on secondary school advising (VO advisering) | Created by us |
 
 ## Description of Samples
 
@@ -141,7 +140,7 @@ To create a sample dataset use `create_cohort_data.R`, change the desired input 
 
 -   `config/age21.yml`
 
--   `config/age25.yml`,
+-   `config/age35.yml`,
 
     and run the entire file. The sample dataset will be written to the scratch folder.
 
