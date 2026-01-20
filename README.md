@@ -455,7 +455,7 @@ In this step, we connect sample-specific outcomes to the samples.
 
 -   We check whether the individual meets the residency requirement. We exclude the children who did not live continuously in the Netherlands within a specified period (`child_live_start` - `child_live_end`) allowing for a number of slack days defined by `child_live_slack_days`.
 
--   We add sample-specific outcomes as described here.
+-   We add sample-specific outcomes as described in [Samples and Outcomes](#samples-and-outcomes).
 
 -   Write the resulting sample (`03_outcomes.rds)` dataset to *the scratch folder.*
 
