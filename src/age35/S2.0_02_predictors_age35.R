@@ -164,7 +164,7 @@ get_ipi_filename <- function(year) {
   # get all ipi files with the specified year
   fl <- list.files(
     path = file.path(loc$data_folder, "InkomenBestedingen/INTEGRAAL PERSOONLIJK INKOMEN", year),
-    pattern = paste0("PERSOONINK", year, "TABV[0-9]+\\.sav"), 
+    pattern = paste0("PERSOONINK", year, "TABV[0-9]+\\.[sav|SAV]"), 
     full.names = TRUE
   )
   # return only the latest version
@@ -176,7 +176,7 @@ get_inpa_filename <- function(year) {
   # get all inpa files with the specified year
   fl <- list.files(
     path = file.path(loc$data_folder, "InkomenBestedingen/INPATAB"),
-    pattern = paste0("INPA", year, "TABV[0-9]+\\.sav"), 
+    pattern = paste0("INPA", year, "TABV[0-9]+\\.[sav|SAV]"), 
     full.names = TRUE
   )
   # return only the latest version
@@ -894,6 +894,10 @@ rm(diff_hh)
 cohort_dat <- cohort_dat %>% select(-diff_household)
 
 
+#delete observations with missing parental wealth
+cohort_dat <- cohort_dat %>%
+  filter(!is.na(wealth_parents))
+
 
 
 
@@ -983,7 +987,7 @@ cohort_dat <-
   # recode migration background
   mutate(migration_background = recode(migration_background, 
                                        'Nederland' = 'No Migration Background', 
-                                       'Turkije' = 'Turkey', 
+                                       'Turkije' = 'Turkiye', 
                                        'Marokko' = 'Morocco'))
 
 

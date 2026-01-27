@@ -199,9 +199,9 @@ vslgwb_tab <-
 cohort_dat <- inner_join(cohort_dat, vslgwb_tab)
 
 # add corop regions
-corop_tab  <- read_excel(loc$corop_data) %>%
-  select("municipality_code" = paste0("GM", year(dmy(cfg$corop_target_date))), 
-         "corop_code" = paste0("COROP", year(dmy(cfg$corop_target_date)))) %>%
+corop_tab  <- read_excel(paste0(loc$corop_data, year(dmy(cfg$corop_target_date)), ".xlsx")) %>%
+  select("municipality_code" = "gemeenten|Code", 
+         "corop_code" = "COROP-gebieden|Code") %>%
   unique()
 
 cohort_dat <- left_join(cohort_dat, corop_tab, by = "municipality_code") %>%

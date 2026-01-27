@@ -16,7 +16,6 @@ library(haven)
 library(readxl)
 library(dplyr)
 
-
 #### SELECT COHORT FROM GBA ####
 gba_path <- file.path(loc$data_folder, loc$gba_data)
 gba_dat <-  
@@ -34,13 +33,13 @@ gba_dat <-
   rename(sex = GBAGESLACHT) %>%
   mutate(sex = recode(sex, 'Mannen' = 'Men', 'Vrouwen' = 'Women'))
 
-
 # to calculate classroom composition later, we construct a larger classroom sample with potential classmates of children in our cohort
 cohort_dat <- 
   gba_dat %>% 
   filter(birthdate %within% interval((dmy(cfg$child_birth_date_min) - years(2)), ((dmy(cfg$child_birth_date_max)) + years(2))))
 
 
+# record sample size
 sample_size <- tibble(
   n_0_birth_cohort = nrow(cohort_dat %>% 
                             filter(birthdate%within%interval(dmy(cfg$child_birth_date_min), dmy(cfg$child_birth_date_max))))
@@ -56,7 +55,6 @@ cohort_dat <- inner_join(
     as_factor(only_labelled = TRUE, levels = "values"),
   by = c("RINPERSOONS", "RINPERSOON")
 )
-
 
 # record sample size
 sample_size <- sample_size %>% 
@@ -94,7 +92,6 @@ cohort_dat <-
 rm(parents_age, gba_dat)
 
 
-
 #### REGION LINK ####
 
 # find childhood home
@@ -130,7 +127,6 @@ home_tab <-
     type_childhood_home = SOORTOBJECTNUMMER[1])
 
 
-
 # add childhood home to data
 cohort_dat <- inner_join(cohort_dat, home_tab)
 
@@ -148,8 +144,7 @@ vslpc_tab  <- read_sav(vslpc_path) %>%
     POSTCODENUM = ifelse(POSTCODENUM == "----", NA, POSTCODENUM)
   ) %>%
   filter(!is.na(POSTCODENUM)) %>%
-  mutate(postcode3 = as.character(floor(as.numeric(POSTCODENUM)/10))) %>%
-  # mutate(postcode3 = substr(POSTCODENUM, 1, 3)) %>%
+  mutate(postcode3 = as.character(floor(as.numeric(POSTCODENUM)/10))) %>% 
   rename(postcode4 = POSTCODENUM)
 
 # only consider postal codes valid on target_date and create postcode-3 level
@@ -178,12 +173,12 @@ vslgwb_tab <-
 
 cohort_dat <- inner_join(cohort_dat, vslgwb_tab)
 
-
 # add corop regions
-corop_tab  <- read_excel(loc$corop_data) %>%
-  select("municipality_code" = paste0("GM", year(dmy(cfg$corop_target_date))), 
-         "corop_code" = paste0("COROP", year(dmy(cfg$corop_target_date)))) %>%
+corop_tab  <- read_excel(paste0(loc$corop_data, year(dmy(cfg$corop_target_date)), ".xlsx")) %>%
+  select("municipality_code" = "gemeenten|Code", 
+         "corop_code" = "COROP-gebieden|Code") %>%
   unique()
+
 
 cohort_dat <- left_join(cohort_dat, corop_tab, by = "municipality_code") %>%
   select(-c(type_childhood_home, childhood_home))
@@ -227,7 +222,7 @@ birth_adres <-
 
 # add municipalities
 vslgwb_tab <- 
-  vslgwb_tab %>% 
+  vslgwb_tab %>%
   rename("municipality_code_birth" = "municipality_code", 
          "neighborhood_code_birth" = "neighborhood_code")
 
@@ -236,9 +231,9 @@ birth_adres <- inner_join(birth_adres, vslgwb_tab,
                                  "birth_home" = "childhood_home"))
 
 # add corop regions
-corop_tab  <- read_excel(loc$corop_data) %>%
-  select("municipality_code_birth" = paste0("GM", year(dmy(cfg$corop_target_date))), 
-         "corop_code_birth" = paste0("COROP", year(dmy(cfg$corop_target_date)))) %>%
+corop_tab  <- read_excel(paste0(loc$corop_data, year(dmy(cfg$corop_target_date)), ".xlsx")) %>%
+  select("municipality_code_birth" = "gemeenten|Code", 
+         "corop_code_birth" = "COROP-gebieden|Code") %>%
   unique()
 
 birth_adres <- 
@@ -257,7 +252,7 @@ cohort_dat <-
              "neighborhood_code_birth", "corop_code_birth"), .after = "corop_code") %>%
   select(-RINPERSOON.y)
 
-rm(birth_adres, corop_tab, mother_child_tab, vslgwb_tab, vslpc_tab, adres_tab)
+rm(birth_adres, corop_tab, mother_child_tab, vslgwb_tab)
 
 # mutate factor regions
 cohort_dat <- 
@@ -265,11 +260,104 @@ cohort_dat <-
   mutate(across(c("postcode4_birth", "postcode3_birth", "municipality_code_birth", 
                   "neighborhood_code_birth", "corop_code_birth"), as.factor))
 
-
 # record sample size
 sample_size <- sample_size %>% 
   mutate(n_2_region_link = 
            nrow(cohort_dat %>% filter(birthdate%within%interval(dmy(cfg$child_birth_date_min), dmy(cfg$child_birth_date_max)))))
+
+#### POSTCODE LINK AT AGE 12 AND 16 FOR NEIGHBORHOOD COMPOSITION ####
+# Loop for ages 12 and 16
+for (age in c(cfg$neighborhood_composition_age_1, cfg$neighborhood_composition_age_2)) {
+  # take date at which the child is a specific age 
+  age_tab <- cohort_dat %>%
+    select(RINPERSOONS, RINPERSOON, birthdate) %>%
+    mutate(home_address_date = birthdate %m+% years(age)) %>%
+    select(-birthdate)
+  
+  # take the address registration on a specific age
+  home_tab <- adres_tab %>%
+    filter(RINPERSOON %in% cohort_dat$RINPERSOON & RINPERSOONS %in% cohort_dat$RINPERSOONS) %>%
+    # add home_address_date
+    left_join(age_tab, by = c("RINPERSOONS", "RINPERSOON")) %>%
+    # take addresses that are still open on home_address_date
+    filter(
+      recordstart <= home_address_date &
+        recordend >= home_address_date
+    ) %>%
+    group_by(RINPERSOONS, RINPERSOON) %>%
+    summarise(home = RINOBJECTNUMMER[1],
+              type_home = SOORTOBJECTNUMMER[1]) 
+  
+  ## if missing first check if have an address registration 31 days after the birthday
+  
+  home_tab_missing_after <- adres_tab %>%
+    filter(RINPERSOON %in% cohort_dat$RINPERSOON & RINPERSOONS %in% cohort_dat$RINPERSOONS) %>%
+    left_join(age_tab, by = c("RINPERSOONS", "RINPERSOON")) %>%
+    mutate(pl_missing = if_else((RINPERSOON %in% home_tab$RINPERSOON), 0, 1)) %>%
+    filter (pl_missing == 1) %>% 
+    group_by(RINPERSOONS, RINPERSOON) %>%
+    filter(GBADATUMAANVANGADRESHOUDING > home_address_date) %>%
+    summarize(
+      # date_address is date we take the address of the child, it is the first 
+      # available registered address of a child after their 21st birthday
+      home = RINOBJECTNUMMER[1],
+      type_home = SOORTOBJECTNUMMER[1],
+      birthday = home_address_date[1],
+      date_address = GBADATUMAANVANGADRESHOUDING[1]) %>%
+    mutate(missing = if_else((date_address - birthday > 31), 1, 0)) %>%
+    filter(missing == 0) %>%
+    select(RINPERSOON, RINPERSOONS, home, type_home)
+  
+  home_tab <- rbind (home_tab, home_tab_missing_after) 
+  
+  #for those still missing check 31 days before the birthday
+  
+  home_tab_missing_before <- adres_tab %>%
+    filter(RINPERSOON %in% cohort_dat$RINPERSOON & RINPERSOONS %in% cohort_dat$RINPERSOONS) %>%
+    left_join(age_tab, by = c("RINPERSOONS", "RINPERSOON")) %>%
+    mutate(pl_missing = if_else((RINPERSOON %in% home_tab$RINPERSOON), 0, 1)) %>%
+    filter (pl_missing == 1) %>% 
+    group_by(RINPERSOONS, RINPERSOON) %>%
+    filter(GBADATUMEINDEADRESHOUDING < home_address_date) %>%
+    arrange(desc(GBADATUMEINDEADRESHOUDING), .by_group = TRUE) %>%
+    summarize(
+      # date_address is date we take the address of the child, it is the first 
+      # available registered address of a child after their 21st birthday
+      home = RINOBJECTNUMMER[1],
+      type_home = SOORTOBJECTNUMMER[1],
+      birthday = home_address_date[1],
+      date_address = GBADATUMAANVANGADRESHOUDING[1]) %>%
+    mutate(missing = if_else((date_address - birthday < -31), 1, 0)) %>%
+    filter(missing == 0) %>%
+    select(RINPERSOON, RINPERSOONS, home, type_home)
+  
+  home_tab <- rbind (home_tab, home_tab_missing_before)
+  
+  #connect address to postcode4
+  home_tab <- home_tab %>%
+    inner_join(vslpc_tab, by = c("home" = "RINOBJECTNUMMER",
+                                 "type_home" = "SOORTOBJECTNUMMER")) %>%
+    rename(!!paste0("new_postcode4_age", age) := postcode4) %>%
+    select(c("RINPERSOONS", "RINPERSOON", paste0("new_postcode4_age", age)))
+  
+  # add the postal code to the cohort
+  cohort_dat <- cohort_dat %>%
+    left_join(home_tab,
+              by = c("RINPERSOONS", "RINPERSOON")) %>% 
+    # mutate factor regions
+    mutate(!!paste0("new_postcode4_age", age) := as.factor(!!sym(paste0("new_postcode4_age", age))))
+  
+  # free up memory
+  rm(home_tab, age_tab)
+}
+
+# remove observations if could not find postcode at age 16
+cohort_dat <- cohort_dat %>%
+  filter(!(is.na(postcode4_age16)))
+
+rm(vslpc_tab, adres_tab)
+
+
 
 #### WRITE OUTPUT TO SCRATCH ####
 write_rds(cohort_dat, file.path(loc$scratch_folder, "01_cohort.rds"))

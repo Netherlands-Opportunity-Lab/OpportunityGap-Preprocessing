@@ -8,6 +8,10 @@
 
 
 
+#### PACKAGES ####
+library(tidyverse)
+
+
 # load cohort dataset
 cohort_dat <- read_rds(file.path(loc$scratch_folder, "03_outcomes.rds"))
 
@@ -23,10 +27,10 @@ cohort_dat <-
   ), levels = c("Low", "Mid", "High"))
   ) %>%
   mutate(income_group_tails = factor(case_when(
-    (income_parents_perc >= 0   & income_parents_perc <= .20) ~ "Very Low", 
-    (income_parents_perc >= .80 & income_parents_perc <= 1) ~ "Very High", 
+    (income_parents_perc >= 0   & income_parents_perc <= .20) ~ "Very_Low", 
+    (income_parents_perc >= .80 & income_parents_perc <= 1) ~ "Very_High", 
     TRUE ~ NA_character_
-  ), levels = c("Very Low", "Very High")))
+  ), levels = c("Very_Low", "Very_High")))
 
 
 #### WEALTH GROUP ####
@@ -40,10 +44,11 @@ cohort_dat <-
   ), levels = c("Low", "Mid", "High"))
   ) %>%
   mutate(wealth_group_tails = factor(case_when(
-    (wealth_parents_perc >= 0   & wealth_parents_perc <= .20) ~ "Very Low", 
-    (wealth_parents_perc >= .80 & wealth_parents_perc <= 1) ~ "Very High", 
+    (wealth_parents_perc >= 0   & wealth_parents_perc <= .20) ~ "Very_Low", 
+    (wealth_parents_perc >= .80 & wealth_parents_perc <= 1) ~ "Very_High", 
     TRUE ~ NA_character_
-  ), levels = c("Very Low", "Very High")))
+  ), levels = c("Very_Low", "Very_High")))
+
 
 
 # save as cohort name

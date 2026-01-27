@@ -19,11 +19,11 @@ default:
     childhood_home_age: 15
     
     # Postal code link to homes will be considered on this target date
-    postcode_target_date: "31/12/2024"
+    postcode_target_date: "31/12/2025"
     # Neighbourhood geo link to homes will be considered on this target date
-    gwb_target_date: "31/12/2024"
+    gwb_target_date: "31/12/2025"
     # Corop geo link to homes will be considered on this target date
-    corop_target_date: "31/12/2024"
+    corop_target_date: "31/12/2025"
     
     # Income will be deflated to cpi_base_year euros.
     cpi_base_year: 2024
@@ -38,12 +38,6 @@ default:
     
     # child age at which we measure the outcome
     outcome_age: 35
-
-    # age at which we measure health outcomes
-    health_outcome_age: 34
-    # health outcomes year range
-    health_year_min: 2019
-    health_year_max: 2023
     
     # The parents education will be added to to the cohort
     education_parents: false
@@ -55,6 +49,12 @@ default:
     # Child outome year range
     child_outcome_year_min: 2020
     child_outcome_year_max: 2024
+
+    # age at which we measure health outcomes
+    health_outcome_age: 34
+    # health outcomes year range, one year before last time in 8th grade
+    health_year_min: 2019
+    health_year_max: 2023
     
     # gifts received year range
     gifts_dat_start: 2007
@@ -69,19 +69,18 @@ default:
     # The scratch folder is used to write intermediate output
     scratch_folder: "scratch/age35"
     
-     # path to the cbs microdata
+    # path to the cbs microdata
     gba_data: "Bevolking/GBAPERSOONTAB/2024/GBAPERSOON2024TABV3.sav"
     gbaao_data: "Bevolking/GBAADRESOBJECTBUS/GBAADRESOBJECT2024BUSV1.sav"
     kind_data: "Bevolking/KINDOUDERTAB/KINDOUDER2024TABV1.sav"
     postcode_data: "BouwenWonen/VSLPOSTCODEBUS/VSLPOSTCODEBUSV2025031.sav"
     vslgwb_data: "BouwenWonen/VSLGWBTAB/VSLGWB2025TAB03V1.sav"
-    secm_data: "InkomenBestedingen/SECMBUS/SECMBUS2023V1.SAV"
-    woon_data: "BouwenWonen/LEVCYCLWOONNIETWOONBUS/LEVCYCLWOONNIETWOONBUSV2024122.sav"
     household_data: "Bevolking/GBAHUISHOUDENSBUS/GBAHUISHOUDENS2024BUSV1.sav"
-
+    secm_data: "InkomenBestedingen/SECMBUS/SECMBUS2024V1.SAV"
+    woon_data: "BouwenWonen/LEVCYCLWOONNIETWOONBUS/LEVCYCLWOONNIETWOONBUSV2024122.sav"
+    poverty_data: "InkomenBestedingen/INHARMATAB/"
 
     # resources
     cpi_index_data: "resources/Consumentenprijzen__prijsindex_2015_100_14112022_221558.xlsx"
-    migration_data: "K:/Utilities/Code_Listings/SSBreferentiebestanden/LANDAKTUEELREFV11.SAV"
-    corop_data: "K:/Utilities/HULPbestanden/GebiedeninNederland/Gemeenten en COROP vanaf 1981.xlsx"
-  
+    migration_data: "K:/Utilities/Code_Listings/SSBreferentiebestanden/LANDAKTUEELREFV13.SAV"
+    corop_data: "K:/Utilities/HULPbestanden/GebiedeninNederland/GIN"

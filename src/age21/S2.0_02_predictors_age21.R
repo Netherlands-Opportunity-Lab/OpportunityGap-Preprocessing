@@ -265,6 +265,13 @@ cohort_dat <- cohort_dat %>%
          income_parents = ifelse((is.na(income_ma) & is.na(income_pa)), 
                                  NA, income_parents))
 
+# if income_parents is negative then income_parents becomes NA
+cohort_dat <- 
+  cohort_dat %>%
+  mutate(income_parents = ifelse(income_parents < 0, NA, income_parents))%>%
+  # remove income if income_parents is NA (parents income is NA is all years)
+  filter(!is.na(income_parents))
+
 
 # compute income transformations
 cohort_dat <- 
@@ -277,6 +284,10 @@ cohort_dat <-
   select(-c(income_parents_rank, income_ma, income_pa)) %>%
   ungroup()
 
+#delete observations with missing parental income
+cohort_dat <- cohort_dat %>%
+  filter(!is.na(income_parents))
+
 #### SPLIT THE SAMPLE AND SAVE THE CLASS SAMPLE ####
 class_cohort_dat <- cohort_dat %>%
   filter (!birthdate %within% interval(dmy(cfg$child_birth_date_min), dmy(cfg$child_birth_date_max)))
@@ -286,6 +297,11 @@ write_rds(class_cohort_dat, file.path(loc$scratch_folder, "class_cohort.rds"))
 # filter cohort
 cohort_dat <- cohort_dat %>%
   filter (birthdate %within% interval(dmy(cfg$child_birth_date_min), dmy(cfg$child_birth_date_max)))
+
+
+#### SAVE THE NEIGHBORHOOD SAMPLE ####
+neighborhood_dat <- cohort_dat
+write_rds(neighborhood_dat, file.path(loc$scratch_folder, "neighborhood_cohort.rds"))
 
 
 #### PARENT WEALTH ####
@@ -429,8 +445,12 @@ cohort_dat <-
                                    "wealth_age"  = "year")) %>%
   select(-wealth_age)
 
+## filter out if NA parental wealth
+cohort_dat <- cohort_dat %>%
+  filter(!is.na(wealth_parents))
 
-# compute income transformations
+
+# compute wealth transformations
 cohort_dat <- 
   cohort_dat %>% 
   group_by(birth_year) %>%
@@ -442,6 +462,10 @@ cohort_dat <-
   ungroup()
 
 rm(wealth_parents)
+
+#delete observations with missing parental wealth
+cohort_dat <- cohort_dat %>%
+  filter(!is.na(wealth_parents))
 
 
 
@@ -531,7 +555,7 @@ cohort_dat <-
   # recode migration background
   mutate(migration_background = recode(migration_background, 
                                        'Nederland' = 'No Migration Background', 
-                                       'Turkije' = 'Turkey', 
+                                       'Turkije' = 'Turkiye', 
                                        'Marokko' = 'Morocco'))
 
 

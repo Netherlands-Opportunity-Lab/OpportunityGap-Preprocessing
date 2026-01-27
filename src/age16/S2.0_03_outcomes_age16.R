@@ -19,29 +19,31 @@ cohort_dat <- read_rds(file.path(loc$scratch_folder, "02_predictors.rds"))
 
 sample_size <- read_rds(file.path(loc$scratch_folder, "02_sample_size.rds"))
 
+# create 16 years old varaible for cohort_dat 
+cohort_dat <- cohort_dat %>%
+  mutate(year = as.integer(format(birthdate, "%Y")) + 16)
 
 
 #### LIVE CONTINUOUSLY IN NL ####
 
 # We only include children who live continuously in the Netherlands 
-adres_path <- file.path(loc$data_folder, loc$gbaao_data)
-adres_tab  <- read_sav(adres_path) %>%
+# children are only allowed to live up to 31 days not in the netherlands
+adres_tab <- read_sav(file.path(loc$data_folder, loc$gbaao_data)) %>%
   # select only children
   filter(RINPERSOON %in% cohort_dat$RINPERSOON) %>% 
   mutate(
     RINPERSOONS = as_factor(RINPERSOONS, levels = "values"),
+    SOORTOBJECTNUMMER = as_factor(SOORTOBJECTNUMMER, levels = "values"),
     GBADATUMAANVANGADRESHOUDING = ymd(GBADATUMAANVANGADRESHOUDING),
     GBADATUMEINDEADRESHOUDING = ymd(GBADATUMEINDEADRESHOUDING)
-  ) %>%
-  select(-c(SOORTOBJECTNUMMER, RINOBJECTNUMMER))
-
+  )
 
 # residency requirement for people between child_live_start and child_live_end
 residency_tab <- 
   cohort_dat %>%
   select(RINPERSOONS, RINPERSOON, birthdate) %>%
-  mutate(start_date = ymd(paste0(year(birthdate), "-01-01")) %m+% years(cfg$child_live_age), 
-         end_date = ymd(paste0(year(birthdate), "-12-31")) %m+% years(cfg$child_live_age),
+  mutate(start_date = ymd(paste0(year(birthdate), "-01-01")) %m+% years(cfg$child_live_start), 
+         end_date = ymd(paste0(year(birthdate), "-12-31")) %m+% years(cfg$child_live_end),
          cutoff_days = as.numeric(difftime(end_date, start_date, units = "days")) - 
            cfg$child_live_slack_days) %>%
   select(-birthdate)
@@ -49,7 +51,7 @@ residency_tab <-
 
 # throw out anything with an end date before start_date, and anything with a start date after end_date
 # then also set the start date of everything to start_date, and the end date of everything to end_date
-# then compute the timespan of each record
+# then compute the time span of each record
 adres_tab <- 
   adres_tab %>% 
   inner_join(residency_tab, by = c("RINPERSOONS", "RINPERSOON")) %>%
@@ -62,6 +64,7 @@ adres_tab <-
   ) %>%
   select(-c(GBADATUMAANVANGADRESHOUDING, GBADATUMEINDEADRESHOUDING, 
             start_date, end_date))
+
 
 # group by person and sum the total number of days
 # then compute whether this person lived in the Netherlands continuously
@@ -80,12 +83,11 @@ cohort_dat <-
   filter(continuous_living) %>% 
   select(-continuous_living)
 
-# free up memory
 rm(adres_tab, days_tab, residency_tab)
 
+# record sample size
 sample_size <- sample_size %>% 
   mutate(n_5_child_residency = nrow(cohort_dat))
-
 
 # create a table with incomes at the cpi_base_year level
 # first, load consumer price index data (2015 = 100)
@@ -105,19 +107,19 @@ cpi_tab <- cpi_tab %>%
 get_school_filename <- function(year) {
   fl <- list.files(
     path = file.path(loc$data_folder, "Onderwijs/HOOGSTEOPLTAB", year),
-    pattern = paste0("HOOGSTEOPL", year, "TABV[0-9]+\\.sav"), 
+    pattern = paste0("HOOGSTEOPL", year, "TABV[0-9]+\\.sav"),
     full.names = TRUE
   )
   # return only the latest version
   sort(fl, decreasing = TRUE)[1]
 }
 
-school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), 
+school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(),
                      education = integer())
 for (year in seq.int(cfg$high_school_year_min, cfg$high_school_year_max)) {
-  
+
   if (year <= 2018) {
-    school_dat <- read_sav(get_school_filename(year), 
+    school_dat <- read_sav(get_school_filename(year),
                            col_select = c("RINPERSOONS", "RINPERSOON", "OPLNIVSOI2016AGG4HGMETNIRWO")) %>%
       rename(education = OPLNIVSOI2016AGG4HGMETNIRWO) %>%
       mutate(
@@ -128,11 +130,11 @@ for (year in seq.int(cfg$high_school_year_min, cfg$high_school_year_max)) {
       ) %>%
       # add to data
       bind_rows(school_dat, .)
-    
-    
+
+
   } else if (year >= 2019) {
-    school_dat <- read_sav(get_school_filename(year), 
-                           col_select = c("RINPERSOONS", "RINPERSOON", 
+    school_dat <- read_sav(get_school_filename(year),
+                           col_select = c("RINPERSOONS", "RINPERSOON",
                                           "OPLNIVSOI2021AGG4HGmetNIRWO")) %>%
       rename(education = OPLNIVSOI2021AGG4HGmetNIRWO) %>%
       mutate(
@@ -146,21 +148,15 @@ for (year in seq.int(cfg$high_school_year_min, cfg$high_school_year_max)) {
   }
 }
 
-
-# create 16 years old varaible for cohort_dat 
-cohort_dat <- cohort_dat %>%
-  mutate(year = as.integer(format(birthdate, "%Y")) + 16)
-
-
-cohort_dat <- inner_join(cohort_dat, school_dat, 
+cohort_dat <- inner_join(cohort_dat, school_dat,
                          by = c("RINPERSOON", "RINPERSOONS", "year"))
 
 
 # create dummy variables
-cohort_dat <- 
+cohort_dat <-
   cohort_dat %>%
   # remove category "weet niet of onbekend"
-  filter(education != 9999) %>%   
+  filter(education != 9999) %>%
   mutate(
     vmbo_gl = ifelse(education >= 1220, 1, 0),
     havo    = ifelse(education == 1222 | education >= 2130, 1, 0),
@@ -202,31 +198,7 @@ get_health_filename <- function(year) {
 
 health_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), 
                      youth_health_costs = double(), year = integer())
-for (year in seq(as.integer(cfg$high_school_year_min), as.integer(cfg$high_school_year_max))) {
-  
-  if (year == 2014) {
-    health_tab <- read_sav(get_health_filename(2014),
-                           col_select = c("RINPERSOONS", "RINPERSOON", "ZVWKHUISARTS", "ZVWKGEBOORTEZORG", 
-                                          "ZVWKFARMACIE", "ZVWKMONDZORG", "ZVWKZIEKENHUIS",        
-                                          "ZVWKPARAMEDISCH", "ZVWKHULPMIDDEL", "ZVWKZIEKENVERVOER", 
-                                          "ZVWKBUITENLAND", "ZVWKOVERIG", "ZVWKGERIATRISCH", 
-                                          "ZVWKWYKVERPLEGING", "NOPZVWKHUISARTSINSCHRIJF")) %>%
-      mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "values")) %>%
-      # select only children
-      filter(RINPERSOON %in% cohort_dat$RINPERSOON)
-    
-  } else if (year == 2015 | year == 2016 | year == 2017) {
-    health_tab <- read_sav(get_health_filename(year),
-                           col_select = c("RINPERSOONS", "RINPERSOON", "ZVWKHUISARTS", "ZVWKMULTIDISC",
-                                          "ZVWKFARMACIE", "ZVWKMONDZORG", "ZVWKZIEKENHUIS", "ZVWKGEBOORTEZORG",        
-                                          "ZVWKPARAMEDISCH", "ZVWKHULPMIDDEL", "ZVWKZIEKENVERVOER", 
-                                          "ZVWKBUITENLAND", "ZVWKOVERIG", "ZVWKGERIATRISCH", 
-                                          "ZVWKWYKVERPLEGING", "NOPZVWKHUISARTSINSCHRIJF")) %>%
-      mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "values")) %>%
-      # select only children
-      filter(RINPERSOON %in% cohort_dat$RINPERSOON)
-    
-  } else if (year >= 2018) {
+for (year in seq(as.integer(cfg$health_year_min), as.integer(cfg$health_year_max))) {
     health_tab <- read_sav(get_health_filename(year),
                            col_select = c("RINPERSOONS", "RINPERSOON", "ZVWKHUISARTS", "ZVWKMULTIDISC",
                                           "ZVWKFARMACIE", "ZVWKMONDZORG", "ZVWKZIEKENHUIS", "ZVWKEERSTELIJNSVERBLIJF",        
@@ -236,7 +208,7 @@ for (year in seq(as.integer(cfg$high_school_year_min), as.integer(cfg$high_schoo
       mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "values")) %>%
       # select only children
       filter(RINPERSOON %in% cohort_dat$RINPERSOON)
-  }
+  
   
   health_tab <- health_tab %>%
     # replace negative values with 0
@@ -392,9 +364,9 @@ vslgwb_tab <-
 birth_adres <- inner_join(birth_adres, vslgwb_tab)
 
 # add corop regions
-corop_tab  <- read_excel(loc$corop_data) %>%
-  select("municipality_code" = paste0("GM", year(dmy(cfg$corop_target_date))), 
-         "corop_code" = paste0("COROP", year(dmy(cfg$corop_target_date)))) %>%
+corop_tab  <- read_excel(paste0(loc$corop_data, year(dmy(cfg$corop_target_date)), ".xlsx")) %>%
+  select("municipality_code" = "gemeenten|Code", 
+         "corop_code" = "COROP-gebieden|Code") %>%
   unique()
 
 birth_adres <- left_join(birth_adres, corop_tab, by = "municipality_code") %>%
@@ -690,15 +662,27 @@ get_school_filename <- function(year) {
   sort(fl, decreasing = TRUE)[1]
 }
 
+# hold out mean function
+hold_out_means_classroom <- function(x) {
+  hold <- ((sum(x, na.rm = FALSE) - x) / (length(x) - 1))
+  return(hold)
+}
 
-school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), OPLNR = character(), VOLEERJAAR = character(), 
+
+school_dat <- tibble(RINPERSOONS = factor(), RINPERSOON = character(), VOLEERJAAR = character(), 
                      BRIN_crypt = character(), VOBRINVEST = character())
 
-for (year in seq(as.integer(cfg$secondary_classroom_year_min ),as.integer(cfg$secondary_classroom_year_max))) {
+for (year in seq(as.integer(cfg$secondary_school_year_min),as.integer(cfg$secondary_school_year_max))) { 
+  #Warning messages:
+  #1: `..1$OPLNR` and `..2$OPLNR` have conflicting value labels.
+  #ℹ Labels for these values will be taken from `..1$OPLNR`.
+  #✖ Values: "085277", "085278", "085287", "085293", "086439", "086440", "086441", "086442", …, "997632", and "997633" 
+  # --> only matters if want to find the level of secondary school, so I leave it out
+  
   school_dat <- 
     # read file from disk
     read_sav(get_school_filename(year), 
-             col_select = c("RINPERSOONS", "RINPERSOON","OPLNR", "VOLEERJAAR", 
+             col_select = c("RINPERSOONS", "RINPERSOON", "VOLEERJAAR", 
                             "BRIN_crypt", "VOBRINVEST")) %>% 
     mutate(RINPERSOONS = as_factor(RINPERSOONS, levels = "value")) %>%
     # add year
@@ -725,10 +709,8 @@ school_dat <- school_dat %>%
 
 # link to classroom sample
 school_dat <- school_dat %>%
-  left_join(class_cohort_dat, 
-            by = c("RINPERSOON", "RINPERSOONS"))%>%
-  # drop all children who are not in the classroom sample 
-  filter(!is.na(income_parents_perc))
+  right_join(class_cohort_dat,  #keep all children from the classroom sample to create a "classroom"of children who left school
+            by = c("RINPERSOON", "RINPERSOONS")) 
 
 
 # generate secondary school ID
@@ -764,11 +746,11 @@ school_dat <- school_dat %>%
 
 # classroom outcomes: class_foreign_born_parents, class_parents_below_25, class_parents_below_50, class_parents_above_75
 
-# only keep classes with more than one student per class
-school_dat <- school_dat %>%
-  group_by(school_ID, year) %>%
-  mutate(n = n()) %>%
-  filter(n > 1)
+# # only keep classes with more than one student per class
+# school_dat <- school_dat %>%
+#   group_by(school_ID, year) %>%
+#   mutate(n = n()) %>%
+#   filter(n > 1)
 
 
 
@@ -799,20 +781,126 @@ cohort_dat <- cohort_dat %>%
 
 rm(school_dat, class_cohort_dat)
 
+#### NEIGHBORHOOD COMPOSITION ####
+neighborhood_cohort_dat <- read_rds(file.path(loc$scratch_folder, "neighborhood_cohort.rds"))
+
+# ##initiate poverty_tab
+# poverty_tab <- tibble(RINPERSOONS = factor(), RINPERSOON = character(),
+#                       household_below_poverty = double(), year = integer())
+# 
+# for (year in seq(as.integer(cfg$parent_income_year_min), as.integer(cfg$parent_income_year_max))) {
+# 
+#   # load koppel data person to household
+#   koppel_hh <- read_sav(get_koppeltabel_filename2(year)) %>%
+#     # select only incomes of children
+#     filter(RINPERSOON %in% cohort_dat$RINPERSOON) %>%
+#     mutate(RINPERSOONSHKW = as_factor(RINPERSOONSHKW, levels = "value"),
+#            RINPERSOONS = as_factor(RINPERSOONS, levels = "value"))
+# 
+# 
+#   #load poverty data
+#   poverty_child <-
+#     read_sav(file.path(loc$data_folder, paste0(loc$poverty_data, "INHARMA", year, "TABV1.sav"))) %>%
+#     mutate(
+#       RINPERSOONSHKW = as_factor(RINPERSOONSHKW, levels = "value"),
+#       INHARMOEDE = as.numeric(INHARMOEDE),
+#       year = year
+#     ) %>%
+#     mutate(
+#       household_below_poverty = case_when(INHARMOEDE %in% c(998, 999) ~ NA_real_,
+#                                 INHARMOEDE < 100 ~ 1,
+#                                 TRUE ~ 0)
+#     ) %>%
+#     inner_join(koppel_hh, by = c("RINPERSOONSHKW", "RINPERSOONHKW")) %>%
+#     select(-c("INHARMOEDE", "RINPERSOONHKW", "RINPERSOONSHKW"))
+# 
+#   poverty_tab <- rbind(poverty_tab, poverty_child)
+# 
+#   rm(koppel_hh, poverty_child)
+# }
+# 
+# # add year variable at which the child is a specific age
+# poverty_tab <-
+#   poverty_tab %>%
+#   rename(poverty_year = year) %>%
+#   left_join(cohort_dat %>% select(RINPERSOONS, RINPERSOON, year),
+#             by = c("RINPERSOONS", "RINPERSOON"))
+# 
+# 
+# # compute mean, dummy = 1 if household_below_poverty =1 in both years, 0 if 0 in any of the years, and NA if NA in any of the years
+# poverty_tab <-
+#   poverty_tab %>%
+#   group_by(RINPERSOONS, RINPERSOON) %>%
+#   summarize(household_below_poverty = case_when(any(is.na(household_below_poverty)) ~ NA_real_,
+#                                       any(household_below_poverty == 0) ~ 0,
+#                                       all(household_below_poverty == 1, na.rm = TRUE) ~ 1)) %>%
+#   ungroup()
+
+
+neighborhood_cohort_dat <- neighborhood_cohort_dat %>%
+  mutate(below_p25 = if_else(income_parents_perc < 0.25, 1, 0),
+         below_p50 = if_else(income_parents_perc < 0.5, 1, 0),
+         above_p75 = if_else(income_parents_perc > 0.75, 1, 0),
+         GBAGEBOORTELANDMOEDER = as_factor(GBAGEBOORTELANDMOEDER),
+         GBAGEBOORTELANDVADER = as_factor(GBAGEBOORTELANDVADER),
+         foreign_born_parents = if_else((GBAGEBOORTELANDMOEDER != "Nederland" & 
+                                           GBAGEBOORTELANDVADER != "Nederland"),  1, 0)
+         )
+
+#Loop for postcodes at age 12 and 16
+for (age in c(cfg$neighborhood_composition_age_1, cfg$neighborhood_composition_age_2)) {
+  # neighborhood composition at pc4 level 
+  neighborhood_cohort_dat <- neighborhood_cohort_dat %>%
+    group_by(!!sym(paste0("postcode4_age", age))) %>%
+    mutate(
+      !!paste0("age", age, "_neighborhood_income_below_25th") := if_else(is.na(!!sym(paste0("postcode4_age", age))), NA_real_, hold_out_means(below_p25)),
+      !!paste0("age", age, "_neighborhood_income_below_50th") := if_else(is.na(!!sym(paste0("postcode4_age", age))), NA_real_, hold_out_means(below_p50)),
+      !!paste0("age", age, "_neighborhood_income_above_75th") := if_else(is.na(!!sym(paste0("postcode4_age", age))), NA_real_, hold_out_means(above_p75)),
+      !!paste0("age", age, "_neighborhood_foreign_born_parents") := if_else(is.na(!!sym(paste0("postcode4_age", age))), NA_real_, hold_out_means(foreign_born_parents))
+    ) %>% ungroup()
+}
+
+neighborhood_cohort_dat <- neighborhood_cohort_dat %>%
+  select(c("RINPERSOONS", "RINPERSOON", contains("age12_neighborhood"), contains("age16_neighborhood"))) %>%
+  rename_with(~ sub("age16_", "", .x), starts_with("age16_"))
+
+
+cohort_dat <- cohort_dat %>%
+  left_join(neighborhood_cohort_dat, by = c("RINPERSOONS", "RINPERSOON"))
+ 
+rm(neighborhood_cohort_dat)
+
+
+#### DELETE OBSERVATIONS WITH MISSING VALUES FOR THESE VARIABLES ####
+outcomes <- c("secondary_class_foreign_born_parents", "secondary_class_income_below_25th", 
+              "secondary_class_income_below_50th", "secondary_class_income_above_75th",
+              
+              "neighborhood_income_below_25th", "neighborhood_income_below_50th", 
+              "neighborhood_income_above_75th", "neighborhood_foreign_born_parents" 
+)
+
+cohort_dat <- cohort_dat %>%
+  filter(rowSums(is.na(select(., all_of(outcomes)))) == 0)
+
 
 #### PREFIX ####
 
 # add prefix to outcomes
-outcomes <- c("vmbo_gl", "havo", "vwo", 
+outcomes <- c(# "vmbo_gl", "havo", "vwo", 
               "youth_health_costs", "youth_protection", "living_space_pp", 
+              
               "primary_class_foreign_born_parents", "primary_class_income_below_25th", 
               "primary_class_income_below_50th", "primary_class_income_above_75th",
+
               "age12_neighborhood_income_below_25th", "age12_neighborhood_income_below_50th", 
-              "age12_neighborhood_income_above_75th", "age12_neighborhood_foreign_born_parents",
+              "age12_neighborhood_income_above_75th", "age12_neighborhood_foreign_born_parents", 
+              
               "secondary_class_foreign_born_parents", "secondary_class_income_below_25th", 
               "secondary_class_income_below_50th", "secondary_class_income_above_75th",
+              
               "neighborhood_income_below_25th", "neighborhood_income_below_50th", 
-              "neighborhood_income_above_75th", "neighborhood_foreign_born_parents")
+              "neighborhood_income_above_75th", "neighborhood_foreign_born_parents" 
+              )
 suffix <- "c16_"
 
 
